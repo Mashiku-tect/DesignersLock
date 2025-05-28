@@ -9,6 +9,7 @@ import NewOrderScreen from './components/NewOrderScreen';
 import ForgotPasswordScreen from './components/ForgotPasswordScreen';
 import DesignersScreen from './components/DesignersScreen';
 import ChatScreen from './components/ChatScreen';
+import ProductScreen from './components/ProductScreen';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,15 @@ export default function App() {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
          <Stack.Screen name="DesignersScreen" component={DesignersScreen} />
            <Stack.Screen name="ChatScreen" component={ChatScreen} />
+            <Stack.Screen 
+        name="Product" 
+        component={ProductScreen} 
+        options={{ 
+          title: 'Product Details',
+          headerBackTitleVisible: false,
+          headerTintColor: '#4a6bff',
+        }} 
+      />
       </Stack.Navigator>
     </NavigationContainer>
   );

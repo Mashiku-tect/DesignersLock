@@ -1,9 +1,32 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, TextInput, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// Sample product data
+const products = [
+  { id: '1001', image: require('../assets/product1.jpg'), title: 'Abstract Art #1', price: '$49.99' },
+  { id: '1002', image: require('../assets/product2.jpg'), title: 'Nature Landscape', price: '$39.99' },
+  { id: '1003', image: require('../assets/product3.jpg'), title: 'City Skyline', price: '$59.99' },
+  { id: '1004', image: require('../assets/product4.jpg'), title: 'Portrait Study', price: '$29.99' },
+  { id: '1005', image: require('../assets/product5.jpg'), title: 'Minimalist Design', price: '$45.99' },
+];
+
 export default function DashboardScreen({ navigation }) {
-  // Sample data - replace with your actual data
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearch = () => {
+    if (searchQuery.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+    const results = products.filter(product => 
+      product.id.includes(searchQuery) || 
+      product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setSearchResults(results);
+  };
+
   const recentOrders = [
     { id: 1, client: 'Sarah Johnson', date: 'Today, 10:30 AM', status: 'In Progress', amount: '$245.00' },
     { id: 2, client: 'Michael Chen', date: 'Yesterday, 2:15 PM', status: 'Completed', amount: '$180.50' },
@@ -25,6 +48,43 @@ export default function DashboardScreen({ navigation }) {
           />
         </TouchableOpacity>
       </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search products by ID or name"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleSearch}
+        />
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <Ionicons name="search" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <View style={styles.searchResultsContainer}>
+          <Text style={styles.sectionTitle}>Search Results</Text>
+          <FlatList
+            horizontal
+            data={searchResults}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity 
+                style={styles.productCard}
+                onPress={() => navigation.navigate('Product', { product: item })}
+              >
+                <Image source={item.image} style={styles.productImage} />
+                <Text style={styles.productTitle}>{item.title}</Text>
+                <Text style={styles.productPrice}>{item.price}</Text>
+              </TouchableOpacity>
+            )}
+            contentContainerStyle={styles.searchResultsList}
+          />
+        </View>
+      )}
 
       {/* Stats Cards */}
       <View style={styles.statsContainer}>
@@ -131,6 +191,60 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+  },
+  searchButton: {
+    backgroundColor: '#4a6bff',
+    borderRadius: 10,
+    padding: 15,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchResultsContainer: {
+    marginBottom: 20,
+  },
+  searchResultsList: {
+    paddingVertical: 10,
+  },
+  productCard: {
+    width: 150,
+    marginRight: 15,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  productImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  productTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  productPrice: {
+    fontSize: 14,
+    color: '#4a6bff',
+    fontWeight: 'bold',
   },
   statsContainer: {
     flexDirection: 'row',
