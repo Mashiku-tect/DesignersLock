@@ -14,7 +14,6 @@ export default function NewOrderScreen({ navigation }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const handleSubmit = () => {
-    // Handle form submission
     alert('Order created successfully!');
     navigation.goBack();
   };
@@ -22,7 +21,6 @@ export default function NewOrderScreen({ navigation }) {
   const handleUpload = async () => {
     try {
       if (Platform.OS === 'web') {
-        // For web, use DocumentPicker
         const result = await DocumentPicker.getDocumentAsync({
           type: ['image/png', 'image/jpeg'],
           copyToCacheDirectory: false,
@@ -38,7 +36,6 @@ export default function NewOrderScreen({ navigation }) {
           }
         }
       } else {
-        // For mobile, use ImagePicker
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: false,
@@ -69,12 +66,13 @@ export default function NewOrderScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>New Design Order</Text>
-        <View style={{ width: 24 }} /> {/* Spacer for alignment */}
-      </View>
+  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
+    <Ionicons name="arrow-back" size={24} color="#333" />
+  </TouchableOpacity>
+  <Text style={styles.headerTitle}>New Designing Order</Text>
+  <View style={styles.headerIcon} /> {/* Placeholder to balance layout */}
+</View>
+
 
       <ScrollView 
         contentContainerStyle={styles.formContainer}
@@ -146,7 +144,7 @@ export default function NewOrderScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Upload Section */}
+        {/* Upload Section - Fixed */}
         <View style={styles.formSection}>
           <Text style={styles.sectionLabel}>Design Files</Text>
           
@@ -154,9 +152,11 @@ export default function NewOrderScreen({ navigation }) {
             style={styles.uploadButton}
             onPress={handleUpload}
           >
-            <Ionicons name="cloud-upload" size={28} color="#4a6bff" />
-            <Text style={styles.uploadButtonText}>Upload Design Files</Text>
-            <Text style={styles.uploadSubtext}>PNG or JPG only (Max 10MB)</Text>
+            <View style={styles.uploadButtonContent}>
+              <Ionicons name="cloud-upload" size={28} color="#4a6bff" />
+              <Text style={styles.uploadButtonText}>Upload Design Files</Text>
+              <Text style={styles.uploadSubtext}>PNG or JPG only</Text>
+            </View>
           </TouchableOpacity>
 
           {/* Display uploaded files */}
@@ -203,19 +203,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: 20,
+  paddingVertical: 16,
+  backgroundColor: 'white',
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
+},
+headerTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#333',
+  textAlign: 'center',
+  marginTop:25
+},
+headerIcon: {
+  width: 24,
+  height: 24,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop:25
+},
+
   formContainer: {
     padding: 20,
     paddingBottom: 100,
@@ -269,6 +280,9 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderRadius: 12,
     padding: 30,
+    width: '100%',
+  },
+  uploadButtonContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -277,11 +291,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginTop: 10,
+    marginBottom: 4,
   },
   uploadSubtext: {
     color: '#999',
     fontSize: 12,
-    marginTop: 4,
   },
   uploadedFilesContainer: {
     marginTop: 15,

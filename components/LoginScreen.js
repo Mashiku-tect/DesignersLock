@@ -1,72 +1,80 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity,
+  Image, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView
+} from 'react-native';
 
 export default function LoginScreen({ navigation }) {
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.innerContainer}>
-        {/* Logo */}
-        <Image 
-          source={require('../assets/lock.png')} 
-          style={styles.logo} 
-          resizeMode="contain"
-        />
-        
-        {/* Welcome Text */}
-        <Text style={styles.title}>Welcome to DesignLock</Text>
-        <Text style={styles.subtitle}>Please sign in to continue</Text>
-        
-        {/* Form */}
-        <View style={styles.form}>
-          <TextInput 
-            style={styles.input} 
-            placeholder="Email or Phone" 
-            placeholderTextColor="#999"
-            keyboardType="email-address"
-            autoCapitalize="none"
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <View style={styles.innerContainer}>
+          {/* Logo */}
+          <Image
+            source={require('../assets/lock.png')}
+            style={styles.logo}
+            resizeMode="contain"
           />
-          
-          <TextInput 
-            style={styles.input} 
-            placeholder="Password" 
-            placeholderTextColor="#999"
-            secureTextEntry
-          />
-          
-          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Dashboard')}>
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </TouchableOpacity>
+
+          {/* Welcome Text */}
+          <Text style={styles.title}>Welcome to DesignLock</Text>
+          <Text style={styles.subtitle}>Please sign in to continue</Text>
+
+          {/* Form */}
+          <View style={styles.form}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email or Phone"
+              placeholderTextColor="#999"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#999"
+              secureTextEntry
+            />
+
+            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Dashboard')}>
+              <Text style={styles.loginButtonText}>Login</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+              <Text style={styles.forgotPassword}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account?</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.footerLink}> Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.footerLink}> Sign Up</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f8f9fa', // Match your main background color or use a header color
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   innerContainer: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 30,
-     paddingBottom: 40,
+    paddingBottom: 40,
   },
   logo: {
     width: 120,
@@ -134,10 +142,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 20,
   },
-  footerText: {
-    color: '#4a6bff',
+   footerText: {
+   
+   color: '#333', // better contrast on light background
     fontSize: 14,
   },
+
   footerLink: {
     color: '#4a6bff',
     fontSize: 14,

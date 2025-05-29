@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   Image
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 const ChatScreen = ({ route, navigation }) => {
@@ -18,7 +19,6 @@ const ChatScreen = ({ route, navigation }) => {
   const [newMessage, setNewMessage] = useState('');
   const scrollViewRef = useRef();
 
-  // Mock initial messages
   useEffect(() => {
     setMessages([
       {
@@ -42,25 +42,23 @@ const ChatScreen = ({ route, navigation }) => {
     ]);
   }, []);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
-    
+
     const newMsg = {
       id: Date.now().toString(),
       text: newMessage,
       sender: 'me',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    
+
     setMessages([...messages, newMsg]);
     setNewMessage('');
-    
-    // Simulate designer reply after 1 second
+
     setTimeout(() => {
       const replyMsg = {
         id: (Date.now() + 1).toString(),
@@ -73,85 +71,95 @@ const ChatScreen = ({ route, navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={90}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        
-        <View style={styles.headerInfo}>
-          <Image source={{ uri: designer.image }} style={styles.designerImage} />
-          <View>
-            <Text style={styles.designerName}>{designer.name}</Text>
-            <Text style={styles.designerStatus}>Online</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+
+          <View style={styles.headerInfo}>
+            <Image source={{ uri: designer.image }} style={styles.designerImage} />
+            <View>
+              <Text style={styles.designerName}>{designer.name}</Text>
+              <Text style={styles.designerStatus}>Online</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity>
+            <Ionicons name="ellipsis-vertical" size={20} color="#333" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Chat Body */}
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={styles.messagesContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {messages.map((message) => (
+              <View
+                key={message.id}
+                style={[
+                  styles.messageBubble,
+                  message.sender === 'me' ? styles.myMessage : styles.theirMessage
+                ]}
+              >
+                <Text style={[styles.messageText, message.sender === 'me' && { color: 'white' }]}>
+                  {message.text}
+                </Text>
+                <Text style={styles.messageTime}>{message.time}</Text>
+              </View>
+            ))}
+          </ScrollView>
+
+          {/* Message Input */}
+          <View style={styles.inputContainer}>
+            <TouchableOpacity style={styles.attachmentButton}>
+              <Ionicons name="attach" size={24} color="#4a6bff" />
+            </TouchableOpacity>
+
+            <TextInput
+              style={styles.messageInput}
+              placeholder="Type your message..."
+              placeholderTextColor="#999"
+              value={newMessage}
+              onChangeText={setNewMessage}
+              multiline
+            />
+
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={handleSendMessage}
+              disabled={newMessage.trim() === ''}
+            >
+              <Ionicons
+                name="send"
+                size={20}
+                color={newMessage.trim() === '' ? '#ccc' : '#4a6bff'}
+              />
+            </TouchableOpacity>
           </View>
         </View>
-        
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-vertical" size={20} color="#333" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Chat Messages */}
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={styles.messagesContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            style={[
-              styles.messageBubble,
-              message.sender === 'me' ? styles.myMessage : styles.theirMessage
-            ]}
-          >
-            <Text style={styles.messageText}>{message.text}</Text>
-            <Text style={styles.messageTime}>{message.time}</Text>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* Message Input */}
-      <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachmentButton}>
-          <Ionicons name="attach" size={24} color="#4a6bff" />
-        </TouchableOpacity>
-        
-        <TextInput
-          style={styles.messageInput}
-          placeholder="Type your message..."
-          placeholderTextColor="#999"
-          value={newMessage}
-          onChangeText={setNewMessage}
-          multiline
-        />
-        
-        <TouchableOpacity 
-          style={styles.sendButton}
-          onPress={handleSendMessage}
-          disabled={newMessage.trim() === ''}
-        >
-          <Ionicons 
-            name="send" 
-            size={20} 
-            color={newMessage.trim() === '' ? '#ccc' : '#4a6bff'} 
-          />
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  container: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -185,7 +193,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     padding: 15,
-    paddingBottom: 80,
+    paddingBottom: 10,
   },
   messageBubble: {
     maxWidth: '80%',
@@ -212,9 +220,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  myMessageText: {
-    color: 'white',
-  },
   messageTime: {
     fontSize: 10,
     color: '#999',
@@ -228,10 +233,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
   },
   attachmentButton: {
     padding: 8,

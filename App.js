@@ -10,6 +10,12 @@ import ForgotPasswordScreen from './components/ForgotPasswordScreen';
 import DesignersScreen from './components/DesignersScreen';
 import ChatScreen from './components/ChatScreen';
 import ProductScreen from './components/ProductScreen';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'Text strings must be rendered within a <Text> component'
+]);
+
 
 const Stack = createStackNavigator();
 

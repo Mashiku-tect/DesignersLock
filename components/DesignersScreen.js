@@ -55,6 +55,24 @@ const DesignersScreen = ({ navigation }) => {
         image: 'https://randomuser.me/api/portraits/women/63.jpg',
         bio: 'Focuses on responsive and accessible web designs.'
       },
+         {
+        id: '6',
+        name: 'Nainei Mawazo',
+        specialty: 'Web Design',
+        experience: '3 years',
+        rating: 4.6,
+        image: 'https://randomuser.me/api/portraits/women/53.jpg',
+        bio: 'Focuses on responsive and accessible web designs.'
+      },
+       {
+        id: '7',
+        name: 'Allen Mashiku',
+        specialty: 'Web Design',
+        experience: '3 years',
+        rating: 4.6,
+        image: 'https://randomuser.me/api/portraits/men/53.jpg',
+        bio: 'Focuses on responsive and accessible web designs.'
+      },
     ];
     
     setDesigners(mockDesigners);
@@ -67,7 +85,8 @@ const DesignersScreen = ({ navigation }) => {
       setFilteredDesigners(designers);
     } else {
       const filtered = designers.filter(designer =>
-        designer.name.toLowerCase().includes(searchQuery.toLowerCase())
+        designer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        designer.specialty.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredDesigners(filtered);
     }
@@ -105,7 +124,7 @@ const DesignersScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.designersContainer}>
         {filteredDesigners.length > 0 ? (
           filteredDesigners.map(designer => (
-            <View key={designer.id} style={styles.designerCard}>
+            <View key={`designer-${designer.id}`} style={styles.designerCard}>
               <Image source={{ uri: designer.image }} style={styles.designerImage} />
               
               <View style={styles.designerInfo}>
@@ -129,7 +148,7 @@ const DesignersScreen = ({ navigation }) => {
             </View>
           ))
         ) : (
-          <View style={styles.noResultsContainer}>
+          <View key="no-results" style={styles.noResultsContainer}>
             <Ionicons name="search" size={50} color="#ccc" />
             <Text style={styles.noResultsText}>No designers found</Text>
             <Text style={styles.noResultsSubtext}>Try a different search term</Text>
@@ -144,6 +163,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    marginTop:25
   },
   header: {
     flexDirection: 'row',
