@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -29,7 +29,6 @@ const ProfileScreen = ({ navigation }) => {
     followers: 1243,
     following: 562,
     posts: 87,
-    darkMode: false,
   });
 
   // Edit states
@@ -99,26 +98,15 @@ const ProfileScreen = ({ navigation }) => {
     setEditValue('');
   };
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setUser({ ...user, darkMode: !user.darkMode });
-  };
-
   return (
-    <View style={[styles.container, user.darkMode && styles.darkContainer]}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, user.darkMode && styles.darkHeader]}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={user.darkMode ? '#fff' : '#000'} />
+          <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, user.darkMode && styles.darkText]}>Profile</Text>
-        <TouchableOpacity onPress={toggleDarkMode}>
-          <Ionicons 
-            name={user.darkMode ? 'sunny' : 'moon'} 
-            size={24} 
-            color={user.darkMode ? '#fff' : '#000'} 
-          />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Profile</Text>
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -139,45 +127,44 @@ const ProfileScreen = ({ navigation }) => {
 
         {/* Name and Username */}
         <View style={styles.nameContainer}>
-          <Text style={[styles.name, user.darkMode && styles.darkText]}>{user.name}</Text>
-          <Text style={[styles.username, user.darkMode && styles.darkSubtext]}>{user.username}</Text>
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.username}>{user.username}</Text>
         </View>
 
         {/* Bio */}
         <TouchableOpacity 
-          style={[styles.section, user.darkMode && styles.darkSection]}
+          style={styles.section}
           onPress={() => startEditing('bio', user.bio)}
         >
-          <Text style={[styles.sectionTitle, user.darkMode && styles.darkText]}>Bio</Text>
-          <Text style={[styles.bioText, user.darkMode && styles.darkText]}>{user.bio}</Text>
-          <Feather name="edit-2" size={18} color={user.darkMode ? '#aaa' : '#888'} style={styles.editIcon} />
+          <Text style={styles.sectionTitle}>Bio</Text>
+          <Text style={styles.bioText}>{user.bio}</Text>
+          <Feather name="edit-2" size={18} color="#888" style={styles.editIcon} />
         </TouchableOpacity>
 
         {/* Stats */}
-        <View style={[styles.statsContainer, user.darkMode && styles.darkSection]}>
+        <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, user.darkMode && styles.darkText]}>{user.posts}</Text>
-            <Text style={[styles.statLabel, user.darkMode && styles.darkSubtext]}>Posts</Text>
+            <Text style={styles.statNumber}>{user.posts}</Text>
+            <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, user.darkMode && styles.darkText]}>{user.followers}</Text>
-            <Text style={[styles.statLabel, user.darkMode && styles.darkSubtext]}>Followers</Text>
+            <Text style={styles.statNumber}>{user.followers}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, user.darkMode && styles.darkText]}>{user.following}</Text>
-            <Text style={[styles.statLabel, user.darkMode && styles.darkSubtext]}>Following</Text>
+            <Text style={styles.statNumber}>{user.following}</Text>
+            <Text style={styles.statLabel}>Following</Text>
           </View>
         </View>
 
         {/* Personal Info */}
-        <View style={[styles.section, user.darkMode && styles.darkSection]}>
-          <Text style={[styles.sectionTitle, user.darkMode && styles.darkText]}>Personal Information</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Personal Information</Text>
           
           <InfoItem 
             icon="mail" 
             label="Email" 
             value={user.email} 
-            darkMode={user.darkMode}
             onPress={() => startEditing('email', user.email)}
           />
           
@@ -185,7 +172,6 @@ const ProfileScreen = ({ navigation }) => {
             icon="phone" 
             label="Phone" 
             value={user.phone} 
-            darkMode={user.darkMode}
             onPress={() => startEditing('phone', user.phone)}
           />
           
@@ -193,20 +179,18 @@ const ProfileScreen = ({ navigation }) => {
             icon="map-pin" 
             label="Location" 
             value={user.location} 
-            darkMode={user.darkMode}
             onPress={() => startEditing('location', user.location)}
           />
         </View>
 
         {/* Social Links */}
-        <View style={[styles.section, user.darkMode && styles.darkSection]}>
-          <Text style={[styles.sectionTitle, user.darkMode && styles.darkText]}>Social Links</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Social Links</Text>
           
           <InfoItem 
             icon="globe" 
             label="Website" 
             value={user.website} 
-            darkMode={user.darkMode}
             onPress={() => startEditing('website', user.website)}
           />
           
@@ -214,7 +198,6 @@ const ProfileScreen = ({ navigation }) => {
             icon="instagram" 
             label="Instagram" 
             value={user.instagram} 
-            darkMode={user.darkMode}
             onPress={() => startEditing('instagram', user.instagram)}
           />
           
@@ -222,33 +205,29 @@ const ProfileScreen = ({ navigation }) => {
             icon="twitter" 
             label="Twitter" 
             value={user.twitter} 
-            darkMode={user.darkMode}
             onPress={() => startEditing('twitter', user.twitter)}
           />
         </View>
 
         {/* Account Actions */}
-        <View style={[styles.section, user.darkMode && styles.darkSection]}>
-          <Text style={[styles.sectionTitle, user.darkMode && styles.darkText]}>Account</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
           
           <ActionButton 
             icon="settings" 
             label="Settings" 
-            darkMode={user.darkMode}
             onPress={() => navigation.navigate('Settings')}
           />
           
           <ActionButton 
             icon="help-circle" 
             label="Help & Support" 
-            darkMode={user.darkMode}
             onPress={() => navigation.navigate('Help')}
           />
           
           <ActionButton 
             icon="log-out" 
             label="Log Out" 
-            darkMode={user.darkMode}
             onPress={() => Alert.alert('Log Out', 'Are you sure you want to log out?')}
             isLast
           />
@@ -263,10 +242,10 @@ const ProfileScreen = ({ navigation }) => {
         onRequestClose={() => setIsEditing(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, user.darkMode && styles.darkModalContainer]}>
-            <Text style={[styles.modalTitle, user.darkMode && styles.darkText]}>Edit {editField}</Text>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Edit {editField}</Text>
             <TextInput
-              style={[styles.modalInput, user.darkMode && styles.darkInput]}
+              style={styles.modalInput}
               value={editValue}
               onChangeText={setEditValue}
               autoFocus
@@ -298,23 +277,23 @@ const ProfileScreen = ({ navigation }) => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.imageModalContainer, user.darkMode && styles.darkModalContainer]}>
-            <Text style={[styles.modalTitle, user.darkMode && styles.darkText]}>Change Profile Photo</Text>
+          <View style={styles.imageModalContainer}>
+            <Text style={styles.modalTitle}>Change Profile Photo</Text>
             
             <TouchableOpacity 
               style={styles.imageOption}
               onPress={pickImage}
             >
-              <Ionicons name="image" size={24} color={user.darkMode ? '#fff' : '#000'} />
-              <Text style={[styles.imageOptionText, user.darkMode && styles.darkText]}>Choose from Library</Text>
+              <Ionicons name="image" size={24} color="#000" />
+              <Text style={styles.imageOptionText}>Choose from Library</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
               style={styles.imageOption}
               onPress={takePhoto}
             >
-              <Ionicons name="camera" size={24} color={user.darkMode ? '#fff' : '#000'} />
-              <Text style={[styles.imageOptionText, user.darkMode && styles.darkText]}>Take Photo</Text>
+              <Ionicons name="camera" size={24} color="#000" />
+              <Text style={styles.imageOptionText}>Take Photo</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -342,33 +321,31 @@ const ProfileScreen = ({ navigation }) => {
 };
 
 // Reusable Info Item Component
-const InfoItem = ({ icon, label, value, darkMode, onPress }) => (
+const InfoItem = ({ icon, label, value, onPress }) => (
   <TouchableOpacity style={styles.infoItem} onPress={onPress}>
     <View style={styles.infoIcon}>
-      <Feather name={icon} size={20} color={darkMode ? '#aaa' : '#888'} />
+      <Feather name={icon} size={20} color="#888" />
     </View>
     <View style={styles.infoTextContainer}>
-      <Text style={[styles.infoLabel, darkMode && styles.darkSubtext]}>{label}</Text>
-      <Text style={[styles.infoValue, darkMode && styles.darkText]}>{value}</Text>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
-    <Feather name="edit-2" size={18} color={darkMode ? '#aaa' : '#888'} />
+    <Feather name="edit-2" size={18} color="#888" />
   </TouchableOpacity>
 );
 
 // Reusable Action Button Component
-const ActionButton = ({ icon, label, darkMode, onPress, isLast }) => (
+const ActionButton = ({ icon, label, onPress, isLast }) => (
   <TouchableOpacity 
     style={[
       styles.actionButton, 
-      !isLast && styles.actionButtonBorder,
-      darkMode && styles.darkActionButton,
-      !isLast && darkMode && styles.darkActionButtonBorder
+      !isLast && styles.actionButtonBorder
     ]} 
     onPress={onPress}
   >
-    <Feather name={icon} size={20} color={darkMode ? '#aaa' : '#888'} />
-    <Text style={[styles.actionButtonText, darkMode && styles.darkText]}>{label}</Text>
-    <Entypo name="chevron-right" size={20} color={darkMode ? '#aaa' : '#888'} />
+    <Feather name={icon} size={20} color="#888" />
+    <Text style={styles.actionButtonText}>{label}</Text>
+    <Entypo name="chevron-right" size={20} color="#888" />
   </TouchableOpacity>
 );
 
@@ -376,9 +353,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-  },
-  darkContainer: {
-    backgroundColor: '#121212',
   },
   scrollContainer: {
     paddingBottom: 30,
@@ -391,21 +365,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-  },
-  darkHeader: {
-    backgroundColor: '#1e1e1e',
-    borderBottomColor: '#333',
+    marginTop:20
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-  },
-  darkText: {
-    color: '#fff',
-  },
-  darkSubtext: {
-    color: '#aaa',
   },
   profileImageContainer: {
     alignItems: 'center',
@@ -455,10 +420,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
-  },
-  darkSection: {
-    backgroundColor: '#1e1e1e',
-    shadowColor: '#000',
   },
   sectionTitle: {
     fontSize: 16,
@@ -534,9 +495,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  darkActionButton: {
-    borderBottomColor: '#333',
-  },
   actionButtonText: {
     flex: 1,
     fontSize: 16,
@@ -555,9 +513,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
   },
-  darkModalContainer: {
-    backgroundColor: '#1e1e1e',
-  },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -572,11 +527,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     color: '#333',
-  },
-  darkInput: {
-    borderColor: '#333',
-    color: '#fff',
-    backgroundColor: '#2a2a2a',
   },
   modalButtons: {
     flexDirection: 'row',
