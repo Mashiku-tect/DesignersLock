@@ -11,6 +11,7 @@ import DesignersScreen from './components/DesignersScreen';
 import ChatScreen from './components/ChatScreen';
 import ProductScreen from './components/ProductScreen';
 import { LogBox } from 'react-native';
+import ProfileScreen from './components/ProfileScreen';
 
 LogBox.ignoreLogs([
   'Text strings must be rendered within a <Text> component'
@@ -29,6 +30,7 @@ export default function App() {
         <Stack.Screen name="NewOrder" component={NewOrderScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
          <Stack.Screen name="DesignersScreen" component={DesignersScreen} />
+           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
            <Stack.Screen name="ChatScreen" component={ChatScreen} />
             <Stack.Screen 
         name="Product" 

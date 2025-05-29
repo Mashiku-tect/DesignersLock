@@ -53,12 +53,16 @@ export default function DashboardScreen({ navigation }) {
           <Text style={styles.greeting}>Good Morning</Text>
           <Text style={styles.username}>Allen,Welcome Back</Text>
         </View>
-        <TouchableOpacity style={styles.profileButton}>
-          <Image
-            source={require('../assets/profile-placeholder.png')}
-            style={styles.profileImage}
-          />
-        </TouchableOpacity>
+       <TouchableOpacity 
+  style={styles.profileButton}
+  onPress={() => navigation.navigate('ProfileScreen')}
+>
+  <Image 
+    source={require('../assets/profile-placeholder.png')} 
+    style={styles.profileImage}
+  />
+</TouchableOpacity>
+
       </View>
 
       {/* Search Bar */}
