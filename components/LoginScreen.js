@@ -51,9 +51,9 @@ export default function LoginScreen({ navigation }) {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+          
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.footerLink}> Sign Up</Text>
+              <Text style={styles.footerLink}>Don't have an account ? Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -145,12 +145,12 @@ const styles = StyleSheet.create({
    footerText: {
    
    color: '#333', // better contrast on light background
-    fontSize: 14,
+    fontSize: 10,
   },
 
   footerLink: {
     color: '#4a6bff',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
 });

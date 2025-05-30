@@ -33,7 +33,7 @@ export default function ProductScreen({ route, navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#4a6bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Design Preview</Text>
         <TouchableOpacity onPress={showMenu}>
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#4a6bff',
     textAlign: 'center',
     flex: 1,
     marginLeft: -24,

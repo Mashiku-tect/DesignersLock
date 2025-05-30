@@ -67,7 +67,7 @@ export default function NewOrderScreen({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
   <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
-    <Ionicons name="arrow-back" size={24} color="#333" />
+    <Ionicons name="arrow-back" size={24} color="#4a6bff" />
   </TouchableOpacity>
   <Text style={styles.headerTitle}>New Designing Order</Text>
   <View style={styles.headerIcon} /> {/* Placeholder to balance layout */}
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
 headerTitle: {
   fontSize: 18,
   fontWeight: '600',
-  color: '#333',
+  color: '#4a6bff',
   textAlign: 'center',
   marginTop:25
 },

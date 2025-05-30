@@ -103,7 +103,7 @@ const ProfileScreen = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color="#4a6bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={{ width: 24 }} />
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#4a6bff',
   },
   profileImageContainer: {
     alignItems: 'center',
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 10,
     color: '#888',
   },
   infoItem: {

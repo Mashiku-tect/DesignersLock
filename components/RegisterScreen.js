@@ -1,18 +1,30 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 
 export default function RegisterScreen({ navigation }) {
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.innerContainer}>
           {/* Header */}
           <Text style={styles.title}>Create Your Account</Text>
           <Text style={styles.subtitle}>Join DesignLock to get started</Text>
-          
+
           {/* Form */}
           <View style={styles.form}>
             <TextInput
@@ -21,7 +33,7 @@ export default function RegisterScreen({ navigation }) {
               placeholderTextColor="#999"
               autoCapitalize="words"
             />
-            
+
             <TextInput
               style={styles.input}
               placeholder="Email Address"
@@ -29,51 +41,54 @@ export default function RegisterScreen({ navigation }) {
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            
+
             <TextInput
               style={styles.input}
               placeholder="Phone Number"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
             />
-            
+
             <TextInput
               style={styles.input}
               placeholder="Password"
               placeholderTextColor="#999"
               secureTextEntry
             />
-            
+
             <TextInput
               style={styles.input}
               placeholder="Confirm Password"
               placeholderTextColor="#999"
               secureTextEntry
             />
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.registerButton}
               onPress={() => navigation.navigate('Login')}
             >
               <Text style={styles.registerButtonText}>Create Account</Text>
             </TouchableOpacity>
-            
+
             <View style={styles.termsContainer}>
               <Text style={styles.termsText}>
-                By registering, you agree to our 
-                <Text style={styles.linkText}> Terms of Service</Text> and 
-                <Text style={styles.linkText}> Privacy Policy</Text>
+                By registering, you agree to our{' '}
+                <Text style={styles.linkText}>Terms of Service</Text> and{' '}
+                <Text style={styles.linkText}>Privacy Policy</Text>.
               </Text>
             </View>
           </View>
-          
+
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account?</Text>
+            
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.footerLink}> Sign In</Text>
+              <Text style={styles.footerLink}>Already Signed Up ? Sign In</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Spacer to avoid cutting off content */}
+          <View style={{ height: 40 }} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -88,23 +103,24 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
+    paddingVertical: 20,
+    minHeight: '100%',
   },
   innerContainer: {
     paddingHorizontal: 30,
-    paddingVertical: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   form: {
     width: '100%',
@@ -143,12 +159,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   termsContainer: {
-    marginBottom: 20,
+    marginBottom: 25,
+    paddingHorizontal: 5,
   },
   termsText: {
     color: '#666',
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 13,
     lineHeight: 18,
   },
   linkText: {
@@ -158,15 +175,17 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    flexWrap: 'wrap',
     marginTop: 20,
+    paddingHorizontal: 10,
   },
   footerText: {
     color: '#666',
-    fontSize: 14,
+    fontSize: 13,
   },
   footerLink: {
     color: '#4a6bff',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
 });

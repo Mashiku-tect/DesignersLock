@@ -102,7 +102,7 @@ const DesignersScreen = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#4a6bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Available Designers</Text>
         <View style={{ width: 24 }} /> {/* Spacer for alignment */}
@@ -114,7 +114,7 @@ const DesignersScreen = ({ navigation }) => {
         <TextInput
           style={styles.searchInput}
           placeholder="Search designers by name..."
-          placeholderTextColor="#999"
+          placeholderTextColor="#4a6bff"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#4a6bff',
   },
   searchContainer: {
     flexDirection: 'row',
