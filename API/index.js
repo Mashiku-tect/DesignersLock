@@ -18,6 +18,8 @@ const RegisterRoute = require('./routes/registerRoutes');
 const loginRoute=require('./routes/loginRoutes');
 const orderRoute=require('./routes/orderRoutes');
 const searchRoutes=require('./routes/searchRoutes');
+const paymentRoute=require('./routes/paymentRoutes');
+const checkPaymentRoute=require('./routes/checkPaymentRoutes');
 
 User.hasMany(Product, { foreignKey: 'user_id' });
 User.hasMany(Payment, { foreignKey: 'user_id' });
@@ -38,6 +40,8 @@ app.use('/api', RegisterRoute);
 app.use('/api',loginRoute);
 app.use('/api', orderRoute);
 app.use('/api', searchRoutes);
+app.use('/api', paymentRoute);
+app.use('/api', checkPaymentRoute);
 
 const PORT = process.env.PORT || 5000;
 sequelize.sync().then(() => {

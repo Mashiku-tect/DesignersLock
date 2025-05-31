@@ -47,7 +47,7 @@ const createUniqueProductId = async (title) => {
 
 const createOrder = async (req, res) => {
    const userId = req.user_id;
-   console.log("user Id is"+userId)
+  // console.log("user Id is"+userId)
   try {
     const { clientname, clientphonenumber, designtitle, price, additionalnotes } = req.body;
     const files = req.files;

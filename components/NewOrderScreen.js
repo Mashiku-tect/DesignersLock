@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import jwtDecode from 'jwt-decode';
+
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { AuthContext } from '../AuthContext';
+
 
 
 export default function NewOrderScreen({ navigation }) {
@@ -19,57 +19,6 @@ export default function NewOrderScreen({ navigation }) {
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // const handleSubmit = async () => {
-  //   if (isSubmitting) return;
-    
-  //   if (!formData.clientName || !formData.designTitle || !formData.price) {
-  //     Alert.alert('Required Fields', 'Please fill in all required fields');
-  //     return;
-  //   }
-
-  //   setIsSubmitting(true);
-    
-  //   try {
-  //     const formDataWithFiles = new FormData();
-     
-  //     formDataWithFiles.append('clientname', formData.clientName);
-  //     formDataWithFiles.append('clientphonenumber', formData.contactNumber);
-  //     formDataWithFiles.append('designtitle', formData.designTitle);
-  //     formDataWithFiles.append('price', formData.price);
-  //     formDataWithFiles.append('additionalnotes', formData.notes);
-     
-
-  //     uploadedFiles.forEach((file, index) => {
-  //       formDataWithFiles.append(`files`, {
-  //         uri: file.uri,
-  //         type: file.mimeType || file.type || 'image/jpeg',
-  //         name: file.name || file.fileName || file.uri.split('/').pop(),
-  //       });
-  //     });
-
-  //     const response = await fetch('https://90a7-197-186-16-248.ngrok-free.app/api/orders', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //       body: formDataWithFiles,
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       Alert.alert('Success', `Order created successfully! Product ID: ${data.productId}`);
-  //       navigation.goBack();
-  //     } else {
-  //       Alert.alert('Error', `Failed to create order: ${data.message || 'Unknown error'}`);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting order:', error);
-  //     Alert.alert('Error', 'An error occurred. Please try again.');
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSubmit = async () => {
   if (isSubmitting) return;

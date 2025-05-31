@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import {
   View,
   Text,
@@ -9,16 +11,159 @@ import {
   Modal,
   Platform,
   Alert,
+  PermissionsAndroid,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 export default function ProductScreen({ route, navigation }) {
-  const { product, hasPaid = false } = route.params || {};
+  const { product } = route.params || {};
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
-  const showMenu = () => {
-    // Alert.alert('Menu', 'Add menu actions here', [{ text: 'OK' }]);
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) return;
+
+        const response = await axios.post('https://90a7-197-186-16-248.ngrok-free.app/api/checkpayment',
+          {
+            productId: product.id
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (response.data.hasPaid) {
+          setIsPaid(true);
+        }
+      } catch (err) {
+        console.error('Error checking payment status:', err);
+      }
+    };
+
+    checkPaymentStatus();
+  }, []);
+
+  const handlePayment = () => {
+    Alert.alert(
+      'Confirm Payment',
+      `Are you sure you want to pay ${product.price}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Pay',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('userToken');
+
+              if (!token) {
+                Alert.alert('Authentication Error', 'User token not found.');
+                return;
+              }
+
+              const response = await axios.post(
+                'https://90a7-197-186-16-248.ngrok-free.app/api/pay',
+                {
+                  productId: product.id,
+                  amount: product.price.replace('Tsh:', ''),
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+
+              if (response.data.success) {
+                setIsPaid(true);
+                Alert.alert('Success', 'Payment successful. You can now download your image.');
+              } else {
+                Alert.alert('Payment Failed', 'Something went wrong. Please try again.');
+              }
+            } catch (error) {
+              console.error('Payment error:', error);
+              Alert.alert('Error', 'Could not complete payment.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const downloadImage = async () => {
+    if (downloading) return;
+    
+    setDownloading(true);
+    
+    try {
+      // First we need to get the image URI
+      const localUri = Image.resolveAssetSource(product.image).uri;
+      
+      // For Android, we need to request permissions
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "Storage Permission",
+            message: "App needs access to storage to save images",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK"
+          }
+        );
+        
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert("Permission denied", "Cannot save image without storage permission");
+          return;
+        }
+      }
+      
+      // Check if we have media library permissions
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permission denied", "Cannot save image without media library permission");
+        return;
+      }
+      
+      // Create a filename
+      const filename = localUri.split('/').pop();
+      const fileExt = filename.split('.').pop();
+      const newFilename = `${product.title.replace(/\s+/g, '_')}_${Date.now()}.${fileExt}`;
+      
+      // Download the file
+      const downloadResumable = FileSystem.createDownloadResumable(
+        localUri,
+        FileSystem.documentDirectory + newFilename
+      );
+      
+      const { uri } = await downloadResumable.downloadAsync();
+      
+      // Save to media library
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      await MediaLibrary.createAlbumAsync('Downloads', asset, false);
+      
+      Alert.alert("Success", "Image saved to your gallery!");
+      
+      // Optionally, you can share the image immediately
+      // await Sharing.shareAsync(uri);
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert("Error", "Failed to download image. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const WatermarkOverlay = ({ large = false }) => (
@@ -30,18 +175,16 @@ export default function ProductScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#4a6bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Design Preview</Text>
-        <TouchableOpacity onPress={showMenu}>
+        <TouchableOpacity>
           <Ionicons name="ellipsis-vertical" size={24} color="#333" />
         </TouchableOpacity>
       </View>
 
-      {/* Full Screen Modal */}
       <Modal
         visible={isFullScreen}
         transparent={false}
@@ -56,7 +199,7 @@ export default function ProductScreen({ route, navigation }) {
             <Ionicons name="close" size={30} color="white" />
           </TouchableOpacity>
 
-          {hasPaid ? (
+          {isPaid ? (
             <Image
               source={product.image}
               style={styles.fullScreenImage}
@@ -74,13 +217,12 @@ export default function ProductScreen({ route, navigation }) {
         </SafeAreaView>
       </Modal>
 
-      {/* Product Image */}
       <TouchableOpacity
         style={styles.imageContainer}
         onPress={() => setIsFullScreen(true)}
         activeOpacity={0.9}
       >
-        {hasPaid ? (
+        {isPaid ? (
           <Image source={product.image} style={styles.productImage} />
         ) : (
           <ImageBackground source={product.image} style={styles.productImage}>
@@ -89,17 +231,23 @@ export default function ProductScreen({ route, navigation }) {
         )}
       </TouchableOpacity>
 
-      {/* Product Info */}
       <View style={styles.productInfo}>
         <Text style={styles.title}>{product.title}</Text>
         <Text style={styles.price}>{product.price}</Text>
 
-        {!hasPaid && (
-          <TouchableOpacity
-            style={styles.purchaseButton}
-            onPress={() => navigation.navigate('Payment', { product })}
-          >
+        {!isPaid ? (
+          <TouchableOpacity style={styles.purchaseButton} onPress={handlePayment}>
             <Text style={styles.purchaseButtonText}>Pay to Remove Watermark</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            style={[styles.purchaseButton, downloading && styles.disabledButton]} 
+            onPress={downloadImage}
+            disabled={downloading}
+          >
+            <Text style={styles.purchaseButtonText}>
+              {downloading ? 'Downloading...' : 'Download'}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -192,6 +340,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
   },
   purchaseButtonText: {
     color: 'white',

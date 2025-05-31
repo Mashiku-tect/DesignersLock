@@ -7,40 +7,21 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// // Sample product data
-// const products = [
-//   { id: '1001', image: require('../assets/product1.jpg'), title: 'Abstract Art #1', price: 'Tsh.15000' },
-//   { id: '1002', image: require('../assets/product2.jpg'), title: 'Nature Landscape', price: 'Tsh.10000' },
-//   { id: '1003', image: require('../assets/product3.jpg'), title: 'City Skyline', price: 'Tsh.25000' },
-//   { id: '1004', image: require('../assets/product4.jpg'), title: 'Portrait Study', price: 'Tsh.15000' },
-//   { id: '1005', image: require('../assets/product5.jpg'), title: 'Minimalist Design', price: 'Tsh.20000' },
-// ];
-
-
-
-
 export default function DashboardScreen({ navigation }) {
-  // const [searchQuery, setSearchQuery] = useState('');
-  // const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 const [searchResults, setSearchResults] = useState([]);
 const [loading, setLoading] = useState(false);
 
-  // const handleSearch = (text) => {
-  //   setSearchQuery(text);
+const currentHour = new Date().getHours();
+ let greeting;
+  if (currentHour < 12) {
+    greeting = 'Good Morning';
+  } else if (currentHour < 18) {
+    greeting = 'Good Afternoon';
+  } else {
+    greeting = 'Good Evening';
+  }
 
-  //   if (text.trim() === '') {
-  //     setSearchResults([]);
-  //     return;
-  //   }
-
-  //   const results = products.filter(product =>
-  //     product.id.includes(text) ||
-  //     product.title.toLowerCase().includes(text.toLowerCase())
-  //   );
-
-  //   setSearchResults(results);
-  // };
   const handleSearch = async (text) => {
   setSearchQuery(text);
 
@@ -55,7 +36,7 @@ const [loading, setLoading] = useState(false);
     const formatted = res.data.map(product => ({
       id: product.product_id,
       title: product.designtitle,
-      price: product.price,
+      price: "Tsh:"+product.price,
       image: { uri: `https://90a7-197-186-16-248.ngrok-free.app/${product.productimagepath.replace(/\\/g, '/')}` }
     }));
     setSearchResults(formatted);
@@ -83,7 +64,7 @@ const [loading, setLoading] = useState(false);
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.greeting}>Good Morning</Text>
+            <Text style={styles.greeting}>{greeting}</Text>
             <Text style={styles.username}>Allen,Welcome Back</Text>
           </View>
           <TouchableOpacity 
