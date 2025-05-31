@@ -38,10 +38,15 @@ const Product = sequelize.define('Order', {
   additionalnotes: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue:"In Progress"
   }
+
 }, {
   tableName: 'products', // Replace this with your actual table name
-  timestamps: false // set to false if you're not using createdAt / updatedAt
+  timestamps: true // set to false if you're not using createdAt / updatedAt
 });
 
 Product.associate = function(models) {

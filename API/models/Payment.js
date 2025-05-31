@@ -22,7 +22,7 @@ const Payment = sequelize.define('Payment', {
   }
 }, {
   tableName: 'payments', // replace if your table name is different
-  timestamps: false // change to false if you're not using createdAt/updatedAt
+  timestamps: true // change to false if you're not using createdAt/updatedAt
 });
 
 Payment.associate = function(models) {

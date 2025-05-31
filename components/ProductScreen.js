@@ -31,7 +31,7 @@ export default function ProductScreen({ route, navigation }) {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) return;
 
-        const response = await axios.post('https://90a7-197-186-16-248.ngrok-free.app/api/checkpayment',
+        const response = await axios.post('https://f037-196-249-97-126.ngrok-free.app/api/checkpayment',
           {
             productId: product.id
           },
@@ -72,7 +72,7 @@ export default function ProductScreen({ route, navigation }) {
               }
 
               const response = await axios.post(
-                'https://90a7-197-186-16-248.ngrok-free.app/api/pay',
+                'https://f037-196-249-97-126.ngrok-free.app/api/pay',
                 {
                   productId: product.id,
                   amount: product.price.replace('Tsh:', ''),
@@ -154,10 +154,8 @@ export default function ProductScreen({ route, navigation }) {
       await MediaLibrary.createAlbumAsync('Downloads', asset, false);
       
       Alert.alert("Success", "Image saved to your gallery!");
-      
-      // Optionally, you can share the image immediately
-      // await Sharing.shareAsync(uri);
-      
+    
+    
     } catch (error) {
       console.error('Download error:', error);
       Alert.alert("Error", "Failed to download image. Please try again.");

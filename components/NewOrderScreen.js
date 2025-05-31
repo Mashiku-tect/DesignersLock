@@ -54,7 +54,7 @@ export default function NewOrderScreen({ navigation }) {
       });
     });
 
-    const response = await fetch('https://90a7-197-186-16-248.ngrok-free.app/api/orders', {
+    const response = await fetch('https://f037-196-249-97-126.ngrok-free.app/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'multipart/form-data',

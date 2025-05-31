@@ -20,6 +20,7 @@ const orderRoute=require('./routes/orderRoutes');
 const searchRoutes=require('./routes/searchRoutes');
 const paymentRoute=require('./routes/paymentRoutes');
 const checkPaymentRoute=require('./routes/checkPaymentRoutes');
+const dashboardDataRoute=require('./routes/dashboardDataRoutes');
 
 User.hasMany(Product, { foreignKey: 'user_id' });
 User.hasMany(Payment, { foreignKey: 'user_id' });
@@ -42,6 +43,7 @@ app.use('/api', orderRoute);
 app.use('/api', searchRoutes);
 app.use('/api', paymentRoute);
 app.use('/api', checkPaymentRoute);
+app.use('/api', dashboardDataRoute);
 
 const PORT = process.env.PORT || 5000;
 sequelize.sync().then(() => {

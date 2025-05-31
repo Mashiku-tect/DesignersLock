@@ -1,19 +1,21 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-//import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, Image, TextInput, FlatList, SafeAreaView
+  ScrollView, Image, TextInput, FlatList, SafeAreaView, RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function DashboardScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
-const [searchResults, setSearchResults] = useState([]);
-const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [refreshing, setRefreshing] = useState(false); // 🔁 Refresh state
 
-const currentHour = new Date().getHours();
- let greeting;
+  const currentHour = new Date().getHours();
+  let greeting;
   if (currentHour < 12) {
     greeting = 'Good Morning';
   } else if (currentHour < 18) {
@@ -22,41 +24,65 @@ const currentHour = new Date().getHours();
     greeting = 'Good Evening';
   }
 
+  const fetchDashboardData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        console.warn('No token found');
+        return;
+      }
+      const res = await axios.get(
+        'https://f037-196-249-97-126.ngrok-free.app/api/dashboard',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setDashboardData(res.data);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // 🔁 Handle pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchDashboardData();
+    setRefreshing(false);
+  }, []);
+
   const handleSearch = async (text) => {
-  setSearchQuery(text);
-
-  if (text.trim() === '') {
-    setSearchResults([]);
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const res = await axios.get(`https://90a7-197-186-16-248.ngrok-free.app/api/search?q=${text}`);
-    const formatted = res.data.map(product => ({
-      id: product.product_id,
-      title: product.designtitle,
-      price: "Tsh:"+product.price,
-      image: { uri: `https://90a7-197-186-16-248.ngrok-free.app/${product.productimagepath.replace(/\\/g, '/')}` }
-    }));
-    setSearchResults(formatted);
-  } catch (error) {
-    console.error('Search error:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+    setSearchQuery(text);
+    if (text.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await axios.get(`https://f037-196-249-97-126.ngrok-free.app/api/search?q=${text}`);
+      const formatted = res.data.map(product => ({
+        id: product.product_id,
+        title: product.designtitle,
+        price: "Tsh:" + product.price,
+        image: { uri: `https://f037-196-249-97-126.ngrok-free.app/${product.productimagepath.replace(/\\/g, '/')}` }
+      }));
+      setSearchResults(formatted);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const clearSearch = () => {
     setSearchQuery('');
     setSearchResults([]);
   };
-
-  const recentOrders = [
-    { id: 1, client: 'Sarah Johnson', date: 'Today, 10:30 AM', status: 'In Progress', amount: '$245.00' },
-    { id: 2, client: 'Michael Chen', date: 'Yesterday, 2:15 PM', status: 'Completed', amount: '$180.50' },
-    { id: 3, client: 'Emily Wilson', date: 'Yesterday, 11:45 AM', status: 'Completed', amount: '$320.75' },
-  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -65,14 +91,14 @@ const currentHour = new Date().getHours();
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>{greeting}</Text>
-            <Text style={styles.username}>Allen,Welcome Back</Text>
+            <Text style={styles.username}>{dashboardData?.name}, Welcome Back</Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.profileButton}
             onPress={() => navigation.navigate('ProfileScreen')}
           >
-            <Image 
-              source={require('../assets/profile-placeholder.png')} 
+            <Image
+              source={require('../assets/profile-placeholder.png')}
               style={styles.profileImage}
             />
           </TouchableOpacity>
@@ -82,7 +108,7 @@ const currentHour = new Date().getHours();
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search products by ID or name"
+            placeholder="Search products by ID "
             placeholderTextColor="#4a6bff"
             value={searchQuery}
             onChangeText={handleSearch}
@@ -101,12 +127,11 @@ const currentHour = new Date().getHours();
         {searchQuery.trim() !== '' && (
           <View style={styles.searchResultsContainer}>
             <Text style={styles.sectionTitle}>Search Results</Text>
-
             {searchResults.length > 0 ? (
               <FlatList
                 horizontal
                 data={searchResults}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     style={styles.productCard}
@@ -126,31 +151,30 @@ const currentHour = new Date().getHours();
           </View>
         )}
 
-        {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { backgroundColor: '#4a6bff' }]}>
-            <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Active Orders</Text>
+        {/* Stats & Orders */}
+        <ScrollView
+          style={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.statsContainer}>
+            <View style={[styles.statCard, { backgroundColor: '#4a6bff' }]}>
+              <Text style={styles.statValue}>{dashboardData?.activeOrders}</Text>
+              <Text style={styles.statLabel}>Active Orders</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: '#6c5ce7' }]}>
+              <Text style={styles.statValue}>Tsh {dashboardData?.monthlyRevenue?.toFixed(2)}</Text>
+              <Text style={styles.statLabel}>This Month</Text>
+            </View>
           </View>
-          <View style={[styles.statCard, { backgroundColor: '#6c5ce7' }]}>
-            <Text style={styles.statValue}>$3,245</Text>
-            <Text style={styles.statLabel}>This Month</Text>
-          </View>
-        </View>
 
-        {/* Recent Orders */}
-        <ScrollView style={styles.ordersContainer}>
           <Text style={styles.sectionTitle}>Recent Orders</Text>
-
-          {recentOrders.map(order => (
-            <TouchableOpacity
-              key={order.id}
-              style={styles.orderCard}
-              onPress={() => navigation.navigate('OrderDetails', { orderId: order.id })}
-            >
+          {dashboardData?.orders?.map(order => (
+            <TouchableOpacity key={order.id} style={styles.orderCard}>
               <View style={styles.orderInfo}>
-                <Text style={styles.orderClient}>{order.client}</Text>
-                <Text style={styles.orderDate}>{order.date}</Text>
+                <Text style={styles.orderClient}>{order.clientname}</Text>
+                <Text style={styles.orderDate}>{new Date(order.createdAt).toLocaleString()}</Text>
               </View>
               <View style={styles.orderMeta}>
                 <Text style={[
@@ -159,31 +183,31 @@ const currentHour = new Date().getHours();
                 ]}>
                   {order.status}
                 </Text>
-                <Text style={styles.orderAmount}>{order.amount}</Text>
+                <Text style={styles.orderAmount}>Tsh: {order.price}</Text>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
 
-     {/* Bottom Menu */}
-<View style={styles.bottomMenu}>
-  <TouchableOpacity 
-    style={styles.menuItem}
-    onPress={() => navigation.navigate('NewOrder')}
-  >
-    <Ionicons name="add-circle" size={20} color="#4a6bff" />
-    <Text style={styles.menuText}>New Order</Text>
-  </TouchableOpacity>
-  
-  <TouchableOpacity 
-    style={styles.menuItem}
-    onPress={() => navigation.navigate('DesignersScreen')}
-  >
-    <Ionicons name="people" size={20} color="#4a6bff" />
-    <Text style={styles.menuText}>Designers</Text>
-  </TouchableOpacity>
-</View>
+        {/* Bottom Menu */}
+        <View style={styles.bottomMenu}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('NewOrder')}
+          >
+            <Ionicons name="add-circle" size={20} color="#4a6bff" />
+            <Text style={styles.menuText}>New Order</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('DesignersScreen')}
+          >
+            <Ionicons name="people" size={20} color="#4a6bff" />
+            <Text style={styles.menuText}>Designers</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -193,18 +217,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
- container: {
-  flex: 1,
-  backgroundColor: '#f8f9fa',
-  paddingHorizontal: 20,
-  paddingTop: 20,
-  paddingBottom: 70, // Matches the menu height
-},
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 70,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop:20,
+    marginTop: 20,
     marginBottom: 25,
   },
   greeting: {
@@ -214,7 +237,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 28,
     fontWeight: 'bold',
-     color: '#4a6bff',
+    color: '#4a6bff',
   },
   profileButton: {
     width: 50,
@@ -313,59 +336,46 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   statValue: {
-    fontSize: 28,
+    fontSize: 24,
+    color: '#fff',
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 5,
   },
   statLabel: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
-  },
-  ordersContainer: {
-    flex: 1,
-    marginBottom: 20,
+    color: '#eee',
+    marginTop: 4,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: 'bold',
     marginBottom: 15,
+    color: '#333',
   },
   orderCard: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 18,
+    padding: 15,
+    borderRadius: 10,
     marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
     elevation: 2,
   },
-  orderInfo: {
-    flex: 1,
-  },
+  orderInfo: {},
   orderClient: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
   },
   orderDate: {
-    fontSize: 13,
-    color: '#999',
+    fontSize: 12,
+    color: '#888',
   },
   orderMeta: {
     alignItems: 'flex-end',
   },
   orderStatus: {
     fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
+    fontWeight: 'bold',
   },
   orderAmount: {
     fontSize: 16,
@@ -373,32 +383,23 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   bottomMenu: {
-  flexDirection: 'row',
-  justifyContent: 'space-around',
-  alignItems: 'center',
-  backgroundColor: 'white',
-  borderTopWidth: 1,
-  borderTopColor: '#e1e1e1',
-  paddingVertical: 10,
-  paddingHorizontal: 5, // Added horizontal padding
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  height: 70, // Fixed height to ensure enough space
-},
-menuItem: {
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingHorizontal: 15, // Increased horizontal padding
-  paddingVertical: 8,
-  flex: 1, // Make items share space equally
-},
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    paddingVertical: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  menuItem: {
+    alignItems: 'center',
+  },
   menuText: {
-  fontSize: 6, // Slightly smaller font size
-  color: '#4a6bff',
-  marginTop: 5,
-  marginLeft:0,
-   // Ensure text is centered
-},
+    fontSize: 12,
+    color: '#4a6bff',
+    marginTop: 4,
+  },
 });
