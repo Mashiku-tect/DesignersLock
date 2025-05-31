@@ -1,38 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
+import axios from 'axios';
+//import { useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, Image, TextInput, FlatList, SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Sample product data
-const products = [
-  { id: '1001', image: require('../assets/product1.jpg'), title: 'Abstract Art #1', price: 'Tsh.15000' },
-  { id: '1002', image: require('../assets/product2.jpg'), title: 'Nature Landscape', price: 'Tsh.10000' },
-  { id: '1003', image: require('../assets/product3.jpg'), title: 'City Skyline', price: 'Tsh.25000' },
-  { id: '1004', image: require('../assets/product4.jpg'), title: 'Portrait Study', price: 'Tsh.15000' },
-  { id: '1005', image: require('../assets/product5.jpg'), title: 'Minimalist Design', price: 'Tsh.20000' },
-];
+// // Sample product data
+// const products = [
+//   { id: '1001', image: require('../assets/product1.jpg'), title: 'Abstract Art #1', price: 'Tsh.15000' },
+//   { id: '1002', image: require('../assets/product2.jpg'), title: 'Nature Landscape', price: 'Tsh.10000' },
+//   { id: '1003', image: require('../assets/product3.jpg'), title: 'City Skyline', price: 'Tsh.25000' },
+//   { id: '1004', image: require('../assets/product4.jpg'), title: 'Portrait Study', price: 'Tsh.15000' },
+//   { id: '1005', image: require('../assets/product5.jpg'), title: 'Minimalist Design', price: 'Tsh.20000' },
+// ];
+
+
+
 
 export default function DashboardScreen({ navigation }) {
+  // const [searchQuery, setSearchQuery] = useState('');
+  // const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+const [searchResults, setSearchResults] = useState([]);
+const [loading, setLoading] = useState(false);
 
-  const handleSearch = (text) => {
-    setSearchQuery(text);
+  // const handleSearch = (text) => {
+  //   setSearchQuery(text);
 
-    if (text.trim() === '') {
-      setSearchResults([]);
-      return;
-    }
+  //   if (text.trim() === '') {
+  //     setSearchResults([]);
+  //     return;
+  //   }
 
-    const results = products.filter(product =>
-      product.id.includes(text) ||
-      product.title.toLowerCase().includes(text.toLowerCase())
-    );
+  //   const results = products.filter(product =>
+  //     product.id.includes(text) ||
+  //     product.title.toLowerCase().includes(text.toLowerCase())
+  //   );
 
-    setSearchResults(results);
-  };
+  //   setSearchResults(results);
+  // };
+  const handleSearch = async (text) => {
+  setSearchQuery(text);
+
+  if (text.trim() === '') {
+    setSearchResults([]);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const res = await axios.get(`https://90a7-197-186-16-248.ngrok-free.app/api/search?q=${text}`);
+    const formatted = res.data.map(product => ({
+      id: product.product_id,
+      title: product.designtitle,
+      price: product.price,
+      image: { uri: `https://90a7-197-186-16-248.ngrok-free.app/${product.productimagepath.replace(/\\/g, '/')}` }
+    }));
+    setSearchResults(formatted);
+  } catch (error) {
+    console.error('Search error:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const clearSearch = () => {
     setSearchQuery('');

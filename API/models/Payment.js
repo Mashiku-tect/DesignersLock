@@ -26,7 +26,7 @@ const Payment = sequelize.define('Payment', {
 });
 
 Payment.associate = function(models) {
-Payment.belongsTo(models.User, { foreignKey: 'user_id' });
+Payment.belongsTo(models.Users, { foreignKey: 'user_id' });
 Payment.belongsTo(models.Product, { foreignKey: 'product_id' });
 }
 

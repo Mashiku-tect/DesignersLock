@@ -1,10 +1,41 @@
-import React from 'react';
+import React, { useState,useContext } from 'react';
+import { AuthContext } from '../AuthContext';
+import Toast from 'react-native-toast-message';
 import {
   View, Text, TextInput, TouchableOpacity,
-  Image, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView
+  Image, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView,
+  Alert
 } from 'react-native';
+import axios from 'axios';
 
 export default function LoginScreen({ navigation }) {
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post('https://90a7-197-186-16-248.ngrok-free.app/api/login', {
+        email,
+        password,
+      });
+     Toast.show({
+         type: 'success',
+         text2: res.data.message,
+       });
+        await login(res.data.token)
+      
+    } catch (error) {
+       const errorMessage = error.response?.data?.message || 'Something went wrong';
+      //Alert.alert('Login Failed', error.response?.data?.message || 'Something went wrong');
+      Toast.show({
+          type: 'error',
+          text2: errorMessage,
+        });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -12,23 +43,21 @@ export default function LoginScreen({ navigation }) {
         style={styles.container}
       >
         <View style={styles.innerContainer}>
-          {/* Logo */}
           <Image
             source={require('../assets/lock.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-
-          {/* Welcome Text */}
           <Text style={styles.title}>Welcome to DesignLock</Text>
           <Text style={styles.subtitle}>Please sign in to continue</Text>
 
-          {/* Form */}
           <View style={styles.form}>
             <TextInput
               style={styles.input}
               placeholder="Email or Phone"
               placeholderTextColor="#999"
+              value={email}
+              onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -38,9 +67,11 @@ export default function LoginScreen({ navigation }) {
               placeholder="Password"
               placeholderTextColor="#999"
               secureTextEntry
+              value={password}
+              onChangeText={setPassword}
             />
 
-            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Dashboard')}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
 
@@ -49,9 +80,7 @@ export default function LoginScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
-          
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={styles.footerLink}>Don't have an account ? Sign Up</Text>
             </TouchableOpacity>

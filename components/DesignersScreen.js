@@ -55,7 +55,7 @@ const DesignersScreen = ({ navigation }) => {
         image: 'https://randomuser.me/api/portraits/women/63.jpg',
         bio: 'Focuses on responsive and accessible web designs.'
       },
-         {
+      {
         id: '6',
         name: 'Nainei Mawazo',
         specialty: 'Web Design',
@@ -64,7 +64,7 @@ const DesignersScreen = ({ navigation }) => {
         image: 'https://randomuser.me/api/portraits/women/53.jpg',
         bio: 'Focuses on responsive and accessible web designs.'
       },
-       {
+      {
         id: '7',
         name: 'Allen Mashiku',
         specialty: 'Web Design',
@@ -101,11 +101,13 @@ const DesignersScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
           <Ionicons name="arrow-back" size={24} color="#4a6bff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Available Designers</Text>
-        <View style={{ width: 24 }} /> {/* Spacer for alignment */}
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Available Designers</Text>
+        </View>
+        <View style={styles.headerButton} />
       </View>
 
       {/* Search Bar */}
@@ -114,7 +116,7 @@ const DesignersScreen = ({ navigation }) => {
         <TextInput
           style={styles.searchInput}
           placeholder="Search designers by name..."
-          placeholderTextColor="#4a6bff"
+          placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -124,7 +126,7 @@ const DesignersScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.designersContainer}>
         {filteredDesigners.length > 0 ? (
           filteredDesigners.map(designer => (
-            <View key={`designer-${designer.id}`} style={styles.designerCard}>
+            <View key={designer.id} style={styles.designerCard}>
               <Image source={{ uri: designer.image }} style={styles.designerImage} />
               
               <View style={styles.designerInfo}>
@@ -148,7 +150,7 @@ const DesignersScreen = ({ navigation }) => {
             </View>
           ))
         ) : (
-          <View key="no-results" style={styles.noResultsContainer}>
+          <View style={styles.noResultsContainer}>
             <Ionicons name="search" size={50} color="#ccc" />
             <Text style={styles.noResultsText}>No designers found</Text>
             <Text style={styles.noResultsSubtext}>Try a different search term</Text>
@@ -163,7 +165,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    marginTop:25
+    marginTop: 25
   },
   header: {
     flexDirection: 'row',
@@ -173,6 +175,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  headerButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
@@ -259,7 +271,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   messageButton: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#f0f4ff',
     paddingVertical: 8,
@@ -269,9 +281,9 @@ const styles = StyleSheet.create({
   },
   messageButtonText: {
     color: '#4a6bff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
-    marginLeft: 5,
+    marginTop: 4,
   },
   noResultsContainer: {
     flex: 1,

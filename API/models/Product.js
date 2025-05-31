@@ -45,7 +45,7 @@ const Product = sequelize.define('Order', {
 });
 
 Product.associate = function(models) {
-Product.belongsTo(models.User, { foreignKey: 'user_id' });
+Product.belongsTo(models.Users, { foreignKey: 'user_id' });
 Product.hasMany(models.Payment, { foreignKey: 'product_id' });
 
 }

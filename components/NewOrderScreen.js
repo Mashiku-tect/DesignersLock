@@ -1,78 +1,198 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from 'react-native';
+import jwtDecode from 'jwt-decode';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { AuthContext } from '../AuthContext';
+
 
 export default function NewOrderScreen({ navigation }) {
   const [formData, setFormData] = useState({
     clientName: '',
+    contactNumber: '',
     designTitle: '',
     price: '',
     notes: '',
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    alert('Order created successfully!');
-    navigation.goBack();
-  };
+  // const handleSubmit = async () => {
+  //   if (isSubmitting) return;
+    
+  //   if (!formData.clientName || !formData.designTitle || !formData.price) {
+  //     Alert.alert('Required Fields', 'Please fill in all required fields');
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+    
+  //   try {
+  //     const formDataWithFiles = new FormData();
+     
+  //     formDataWithFiles.append('clientname', formData.clientName);
+  //     formDataWithFiles.append('clientphonenumber', formData.contactNumber);
+  //     formDataWithFiles.append('designtitle', formData.designTitle);
+  //     formDataWithFiles.append('price', formData.price);
+  //     formDataWithFiles.append('additionalnotes', formData.notes);
+     
+
+  //     uploadedFiles.forEach((file, index) => {
+  //       formDataWithFiles.append(`files`, {
+  //         uri: file.uri,
+  //         type: file.mimeType || file.type || 'image/jpeg',
+  //         name: file.name || file.fileName || file.uri.split('/').pop(),
+  //       });
+  //     });
+
+  //     const response = await fetch('https://90a7-197-186-16-248.ngrok-free.app/api/orders', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //       body: formDataWithFiles,
+  //     });
+
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       Alert.alert('Success', `Order created successfully! Product ID: ${data.productId}`);
+  //       navigation.goBack();
+  //     } else {
+  //       Alert.alert('Error', `Failed to create order: ${data.message || 'Unknown error'}`);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting order:', error);
+  //     Alert.alert('Error', 'An error occurred. Please try again.');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  const handleSubmit = async () => {
+  if (isSubmitting) return;
+
+  if (!formData.clientName || !formData.designTitle || !formData.price) {
+    Alert.alert('Required Fields', 'Please fill in all required fields');
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    // 🔐 Get the token from AsyncStorage
+    const token = await AsyncStorage.getItem('userToken');
+    if (!token) {
+      Alert.alert('Unauthorized', 'You must be logged in to create an order.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formDataWithFiles = new FormData();
+    formDataWithFiles.append('clientname', formData.clientName);
+    formDataWithFiles.append('clientphonenumber', formData.contactNumber);
+    formDataWithFiles.append('designtitle', formData.designTitle);
+    formDataWithFiles.append('price', formData.price);
+    formDataWithFiles.append('additionalnotes', formData.notes);
+
+    uploadedFiles.forEach((file) => {
+      formDataWithFiles.append(`files`, {
+        uri: file.uri,
+        type: file.mimeType || file.type || 'image/jpeg',
+        name: file.name || file.fileName || file.uri.split('/').pop(),
+      });
+    });
+
+    const response = await fetch('https://90a7-197-186-16-248.ngrok-free.app/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        // 👉 Add Authorization header
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formDataWithFiles,
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      Alert.alert('Success', `Order created successfully! Product ID: ${data.productId}`);
+      navigation.goBack();
+    } else {
+      Alert.alert('Error', `Failed to create order: ${data.message || 'Unknown error'}`);
+    }
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    Alert.alert('Error', 'An error occurred. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleUpload = async () => {
     try {
+      let result;
       if (Platform.OS === 'web') {
-        const result = await DocumentPicker.getDocumentAsync({
+        result = await DocumentPicker.getDocumentAsync({
           type: ['image/png', 'image/jpeg'],
           copyToCacheDirectory: false,
           multiple: true,
         });
         
-        if (result.type === 'success') {
-          if (result.assets) {
-            const validFiles = result.assets.filter(file => 
-              file.mimeType === 'image/png' || file.mimeType === 'image/jpeg'
-            );
-            setUploadedFiles([...uploadedFiles, ...validFiles]);
-          }
+        if (result.type === 'success' && result.assets) {
+          const validFiles = result.assets.filter(file => 
+            file.mimeType === 'image/png' || file.mimeType === 'image/jpeg'
+          );
+          setUploadedFiles(prev => [...prev, ...validFiles]);
         }
       } else {
-        const result = await ImagePicker.launchImageLibraryAsync({
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+          Alert.alert('Permission required', 'We need access to your photos to upload files');
+          return;
+        }
+
+        result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: false,
           allowsMultipleSelection: true,
           quality: 1,
         });
         
-        if (!result.canceled) {
+        if (!result.canceled && result.assets) {
           const validFiles = result.assets.filter(asset => 
             asset.uri.endsWith('.png') || asset.uri.endsWith('.jpg') || asset.uri.endsWith('.jpeg')
           );
-          setUploadedFiles([...uploadedFiles, ...validFiles]);
+          setUploadedFiles(prev => [...prev, ...validFiles]);
         }
       }
     } catch (error) {
       console.error('Error uploading files:', error);
-      alert('Error uploading files. Please try again.');
+      Alert.alert('Error', 'Error uploading files. Please try again.');
     }
   };
 
   const removeFile = (index) => {
-    const newFiles = [...uploadedFiles];
-    newFiles.splice(index, 1);
-    setUploadedFiles(newFiles);
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
-    <Ionicons name="arrow-back" size={24} color="#4a6bff" />
-  </TouchableOpacity>
-  <Text style={styles.headerTitle}>New Designing Order</Text>
-  <View style={styles.headerIcon} /> {/* Placeholder to balance layout */}
-</View>
-
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={styles.headerIcon}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#4a6bff" />
+        </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>New Designing Order</Text>
+        </View>
+        <View style={styles.headerIcon} />
+      </View>
 
       <ScrollView 
         contentContainerStyle={styles.formContainer}
@@ -83,13 +203,14 @@ export default function NewOrderScreen({ navigation }) {
           <Text style={styles.sectionLabel}>Client Information</Text>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Client Name</Text>
+            <Text style={styles.inputLabel}>Client Name *</Text>
             <TextInput
               style={styles.input}
               placeholder="John Doe"
               placeholderTextColor="#999"
               value={formData.clientName}
               onChangeText={(text) => setFormData({...formData, clientName: text})}
+              returnKeyType="next"
             />
           </View>
 
@@ -100,6 +221,9 @@ export default function NewOrderScreen({ navigation }) {
               placeholder="+255 123 456 789"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
+              value={formData.contactNumber}
+              onChangeText={(text) => setFormData({...formData, contactNumber: text})}
+              returnKeyType="next"
             />
           </View>
         </View>
@@ -109,18 +233,19 @@ export default function NewOrderScreen({ navigation }) {
           <Text style={styles.sectionLabel}>Design Details</Text>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Design Title</Text>
+            <Text style={styles.inputLabel}>Design Title *</Text>
             <TextInput
               style={styles.input}
               placeholder="Business Card Design"
               placeholderTextColor="#999"
               value={formData.designTitle}
               onChangeText={(text) => setFormData({...formData, designTitle: text})}
+              returnKeyType="next"
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Price (TZS)</Text>
+            <Text style={styles.inputLabel}>Price (TZS) *</Text>
             <TextInput
               style={styles.input}
               placeholder="50,000"
@@ -128,6 +253,7 @@ export default function NewOrderScreen({ navigation }) {
               keyboardType="numeric"
               value={formData.price}
               onChangeText={(text) => setFormData({...formData, price: text})}
+              returnKeyType="next"
             />
           </View>
 
@@ -144,18 +270,19 @@ export default function NewOrderScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Upload Section - Fixed */}
+        {/* Upload Section */}
         <View style={styles.formSection}>
           <Text style={styles.sectionLabel}>Design Files</Text>
           
           <TouchableOpacity 
             style={styles.uploadButton}
             onPress={handleUpload}
+            activeOpacity={0.7}
           >
             <View style={styles.uploadButtonContent}>
               <Ionicons name="cloud-upload" size={28} color="#4a6bff" />
               <Text style={styles.uploadButtonText}>Upload Design Files</Text>
-              <Text style={styles.uploadSubtext}>PNG or JPG only</Text>
+              <Text style={styles.uploadSubtext}>PNG or JPG only (max 10 files)</Text>
             </View>
           </TouchableOpacity>
 
@@ -163,7 +290,7 @@ export default function NewOrderScreen({ navigation }) {
           {uploadedFiles.length > 0 && (
             <View style={styles.uploadedFilesContainer}>
               {uploadedFiles.map((file, index) => (
-                <View key={index} style={styles.fileItem}>
+                <View key={`file-${index}`} style={styles.fileItem}>
                   <Ionicons name="document" size={20} color="#4a6bff" />
                   <Text 
                     style={styles.fileName}
@@ -172,7 +299,10 @@ export default function NewOrderScreen({ navigation }) {
                   >
                     {file.name || file.fileName || file.uri.split('/').pop()}
                   </Text>
-                  <TouchableOpacity onPress={() => removeFile(index)}>
+                  <TouchableOpacity 
+                    onPress={() => removeFile(index)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
                     <Ionicons name="close-circle" size={20} color="#ff4a4a" />
                   </TouchableOpacity>
                 </View>
@@ -185,11 +315,17 @@ export default function NewOrderScreen({ navigation }) {
       {/* Submit Button */}
       <View style={styles.footer}>
         <TouchableOpacity 
-          style={styles.submitButton}
+          style={[
+            styles.submitButton,
+            (!formData.clientName || !formData.designTitle || !formData.price) && styles.disabledButton
+          ]}
           onPress={handleSubmit}
-          disabled={!formData.clientName || !formData.designTitle || !formData.price}
+          disabled={!formData.clientName || !formData.designTitle || !formData.price || isSubmitting}
+          activeOpacity={0.7}
         >
-          <Text style={styles.submitButtonText}>Create Order</Text>
+          <Text style={styles.submitButtonText}>
+            {isSubmitting ? 'Creating...' : 'Create Order'}
+          </Text>
           <Ionicons name="checkmark-circle" size={22} color="white" />
         </TouchableOpacity>
       </View>
@@ -203,30 +339,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   header: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingHorizontal: 20,
-  paddingVertical: 16,
-  backgroundColor: 'white',
-  borderBottomWidth: 1,
-  borderBottomColor: '#eee',
-},
-headerTitle: {
-  fontSize: 18,
-  fontWeight: '600',
-  color: '#4a6bff',
-  textAlign: 'center',
-  marginTop:25
-},
-headerIcon: {
-  width: 24,
-  height: 24,
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginTop:25
-},
-
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    marginTop:20,
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#4a6bff',
+  },
+  headerIcon: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   formContainer: {
     padding: 20,
     paddingBottom: 100,
@@ -270,7 +407,7 @@ headerIcon: {
     color: '#333',
   },
   multilineInput: {
-    height: 100,
+    minHeight: 100,
     textAlignVertical: 'top',
     paddingTop: 15,
   },
@@ -336,6 +473,9 @@ headerIcon: {
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3,
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
   },
   submitButtonText: {
     color: 'white',

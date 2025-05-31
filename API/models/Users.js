@@ -25,7 +25,8 @@ const Users = sequelize.define('User', {
   },
   profileimage: {
     type: DataTypes.STRING,
-    allowNull: true
+    defaultValue:null
+
   },
   phonenumber: {
     type: DataTypes.STRING(20),
@@ -33,19 +34,19 @@ const Users = sequelize.define('User', {
   },
   website: {
     type: DataTypes.STRING,
-    allowNull: true
+     defaultValue:"user.com",
   },
   instagram: {
     type: DataTypes.STRING,
-    allowNull: true
+    defaultValue:"@user",
   },
   x: {
     type: DataTypes.STRING,
-    allowNull: true
+    defaultValue:"@user",
   },
   bio: {
     type: DataTypes.STRING,
-    allowNull: true
+    defaultValue:"Digital esigner",
   },
   posts: {
     type: DataTypes.INTEGER,
@@ -58,8 +59,20 @@ const Users = sequelize.define('User', {
 
 
 Users.associate = function(models) {
-User.hasMany(models.Product, { foreignKey: 'user_id' });
-User.hasMany(models.Payment, { foreignKey: 'user_id' });
+Users.hasMany(models.Product, { foreignKey: 'user_id' });
+Users.hasMany(models.Payment, { foreignKey: 'user_id' });
+Message.belongsTo(models.Users, {
+  as: 'Sender',
+  foreignKey: 'sender_id',
+  targetKey: 'user_id'  // points to the primary key in User table
+});
+
+Message.belongsTo(models.Users, {
+  as: 'Receiver',
+  foreignKey: 'receiver_id',
+  targetKey: 'user_id'
+});
+
 }
 
 

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
+import { AuthContext } from '../AuthContext';
 import { 
   View, 
   Text, 
@@ -38,6 +39,7 @@ const ProfileScreen = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState('https://randomuser.me/api/portraits/men/1.jpg');
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const { logout } = useContext(AuthContext);
 
   // Handle image upload
   const pickImage = async () => {
@@ -228,7 +230,7 @@ const ProfileScreen = ({ navigation }) => {
           <ActionButton 
             icon="log-out" 
             label="Log Out" 
-            onPress={() => Alert.alert('Log Out', 'Are you sure you want to log out?')}
+            onPress={() => logout()}
             isLast
           />
         </View>

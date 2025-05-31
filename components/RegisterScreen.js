@@ -1,4 +1,7 @@
-import React from 'react';
+import React,{ useState } from 'react';
+import axios from 'axios';
+import Toast from 'react-native-toast-message';
+import FlashMessage, { showMessage } from 'react-native-flash-message';
 import {
   View,
   Text,
@@ -11,6 +14,48 @@ import {
 } from 'react-native';
 
 export default function RegisterScreen({ navigation }) {
+  const [firstname, setFirstName] = useState('');
+const [lastname, setLastName] = useState('');
+const [email, setEmail] = useState('');
+const [phonenumber, setPhone] = useState('');
+const [password, setPassword] = useState('');
+const [confirmPassword, setConfirmPassword] = useState('');
+
+const handleRegister = async () => {
+  if (password !== confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+
+try {
+  const res = await axios.post('https://76c1-197-250-227-97.ngrok-free.app/api/register', {
+    firstname,
+    lastname,
+    email,
+    phonenumber,
+    password
+  });
+
+  // Alert success message from server
+  //alert(res.data.message);
+   Toast.show({
+    type: 'success',
+    text2: res.data.message,
+  });
+  navigation.navigate('Login');
+
+} catch (error) {
+ 
+    const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+
+  Toast.show({
+    type: 'error',
+    text2: errorMessage,
+  });
+}
+
+};
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -29,8 +74,19 @@ export default function RegisterScreen({ navigation }) {
           <View style={styles.form}>
             <TextInput
               style={styles.input}
-              placeholder="Full Name"
+              placeholder="First Name"
               placeholderTextColor="#999"
+                value={firstname}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+            />
+
+           <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              placeholderTextColor="#999"
+                value={lastname}
+              onChangeText={setLastName}
               autoCapitalize="words"
             />
 
@@ -39,6 +95,8 @@ export default function RegisterScreen({ navigation }) {
               placeholder="Email Address"
               placeholderTextColor="#999"
               keyboardType="email-address"
+                value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
             />
 
@@ -46,6 +104,8 @@ export default function RegisterScreen({ navigation }) {
               style={styles.input}
               placeholder="Phone Number"
               placeholderTextColor="#999"
+               value={phonenumber}
+              onChangeText={setPhone}
               keyboardType="phone-pad"
             />
 
@@ -53,6 +113,8 @@ export default function RegisterScreen({ navigation }) {
               style={styles.input}
               placeholder="Password"
               placeholderTextColor="#999"
+               value={password}
+              onChangeText={setPassword}
               secureTextEntry
             />
 
@@ -60,12 +122,14 @@ export default function RegisterScreen({ navigation }) {
               style={styles.input}
               placeholder="Confirm Password"
               placeholderTextColor="#999"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
               secureTextEntry
             />
 
             <TouchableOpacity
               style={styles.registerButton}
-              onPress={() => navigation.navigate('Login')}
+              onPress={handleRegister}
             >
               <Text style={styles.registerButtonText}>Create Account</Text>
             </TouchableOpacity>
